@@ -1,12 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace HttpTestUtils
 {
@@ -14,7 +12,8 @@ namespace HttpTestUtils
     {
         public static HttpClient SetupHttpClientWithJsonResponse<T>(HttpStatusCode responseStatusCode, T responseBody)
         {
-            var messageHandler = new TestHttpMessageHandler( _ => Task.FromResult(new HttpResponseMessage(responseStatusCode) { Content = new StringContent(JsonConvert.SerializeObject(responseBody), Encoding.UTF8, "application/json") }));
+            var messageHandler = 
+                new TestHttpMessageHandler( _ => Task.FromResult(new HttpResponseMessage(responseStatusCode) { Content = new StringContent(JsonConvert.SerializeObject(responseBody), Encoding.UTF8, "application/json") }));
 
             return new HttpClient(messageHandler);
         }
