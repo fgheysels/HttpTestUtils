@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace HttpTestUtils
 {
@@ -12,8 +13,45 @@ namespace HttpTestUtils
     {
         public static HttpClient SetupHttpClientWithJsonResponse<T>(HttpStatusCode responseStatusCode, T responseBody)
         {
-            var messageHandler = 
-                new TestHttpMessageHandler( _ => Task.FromResult(new HttpResponseMessage(responseStatusCode) { Content = new StringContent(JsonConvert.SerializeObject(responseBody), Encoding.UTF8, "application/json") }));
+            return SetupHttpClientWithJsonResponse(new HttpResponseContent<T>(responseStatusCode, responseBody));
+        }
+
+        public static HttpClient SetupHttpClientWithJsonResponse<T>(HttpResponseContent<T> response)
+        {
+            var messageHandler =
+                new TestHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(response.StatusCode) { Content = new StringContent(JsonConvert.SerializeObject(response.Content), Encoding.UTF8, "application/json") }));
+
+            return new HttpClient(messageHandler);
+        }
+
+        /// <summary>
+        /// Sets up a HttpClientMock that will return another response on each invocation.
+        /// </summary>
+        /// <remarks>The HttpClient will return the responses in the same order as they appear in the <paramref name="responses"/> parameter.</remarks>
+        /// <returns>A HttpClient instance that can be used for test purposes.</returns>
+        public static HttpClient SetupHttpClientWithMultipleJsonResponses<T>(IEnumerable<HttpResponseContent<T>> responses)
+        {
+            var responseQueue = new Queue<HttpResponseContent<T>>();
+
+            foreach (var response in responses)
+            {
+                responseQueue.Enqueue(response);
+            }
+
+            var messageHandler =
+                new TestHttpMessageHandler(_ =>
+                {
+                    var responseContent = responseQueue.Dequeue();
+
+                    var response = new HttpResponseMessage(responseContent.StatusCode)
+                    {
+                        Content = new StringContent(JsonConvert.SerializeObject(responseContent.Content),
+                                                    Encoding.UTF8,
+                                                    "application/json")
+                    };
+
+                    return Task.FromResult(response);
+                });
 
             return new HttpClient(messageHandler);
         }
