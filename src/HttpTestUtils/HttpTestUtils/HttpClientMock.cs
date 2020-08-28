@@ -11,12 +11,12 @@ namespace HttpTestUtils
 {
     public static class HttpClientMock
     {
-        public static HttpClient SetupHttpClientWithJsonResponse<T>(HttpStatusCode responseStatusCode, T responseBody)
+        public static HttpClient SetupHttpClientWithJsonResponse<TResponseContent>(HttpStatusCode responseStatusCode, TResponseContent responseBody)
         {
-            return SetupHttpClientWithJsonResponse(new HttpResponseContent<T>(responseStatusCode, responseBody));
+            return SetupHttpClientWithJsonResponse(new HttpResponseContent<TResponseContent>(responseStatusCode, responseBody));
         }
 
-        public static HttpClient SetupHttpClientWithJsonResponse<T>(HttpResponseContent<T> response)
+        public static HttpClient SetupHttpClientWithJsonResponse<TResponseContent>(HttpResponseContent<TResponseContent> response)
         {
             var messageHandler =
                 new TestHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(response.StatusCode) { Content = new StringContent(JsonConvert.SerializeObject(response.Content), Encoding.UTF8, "application/json") }));
@@ -29,9 +29,9 @@ namespace HttpTestUtils
         /// </summary>
         /// <remarks>The HttpClient will return the responses in the same order as they appear in the <paramref name="responses"/> parameter.</remarks>
         /// <returns>A HttpClient instance that can be used for test purposes.</returns>
-        public static HttpClient SetupHttpClientWithMultipleJsonResponses<T>(IEnumerable<HttpResponseContent<T>> responses)
+        public static HttpClient SetupHttpClientWithMultipleJsonResponses<TResponseContent>(IEnumerable<HttpResponseContent<TResponseContent>> responses)
         {
-            var responseQueue = new Queue<HttpResponseContent<T>>();
+            var responseQueue = new Queue<HttpResponseContent<TResponseContent>>();
 
             foreach (var response in responses)
             {
