@@ -1,0 +1,33 @@
+name: $(date:yyyyMMdd)$(rev:.r)
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - src/*
+
+pr:
+  paths:
+    include:
+      - src/*
+      - build/ci-build.yml
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Compile_and_test
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: 'Build HttpTestUtils solution'
+            inputs:
+              projects: 'src/HttpTestUtils/HttpTestUtils.sln'
+          - task: DotNetCoreCLI@2
+            displayName: 'Run unittests'
+            inputs:
+              command: 'test'
+              projects: 'src/HttpTestUtils/HttpTestUtils.Tests/*.csproj'
+              testRunTitle: 'HttpTestUtils unittests'             
