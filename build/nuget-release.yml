@@ -1,0 +1,72 @@
+name: $(date:yyyyMMdd)$(rev:.r)
+
+trigger: none
+pr: none
+
+parameters:
+- name: PackageMajorVersion
+  type: number
+- name: PackageMinorVersion
+  type: number
+- name: PackagePatchVersion
+  type: number
+
+
+variables:
+- name: Build.Configuration
+  value: 'Release'
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Compile_and_test
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:          
+          - task: DotNetCoreCLI@2
+            displayName: 'Build HttpTestUtils solution'
+            inputs:
+              projects: 'src/HttpTestUtils/HttpTestUtils.sln'
+              arguments: --configuration $(Build.Configuration) 
+          - task: DotNetCoreCLI@2
+            displayName: 'Run unittests'
+            inputs:
+              command: 'test'
+              projects: 'src/HttpTestUtils.Tests/*.csproj'
+              testRunTitle: 'HttpTestUtils unittests' 
+  - stage: Release
+    jobs:
+      - job: Package_and_push
+        pool:
+          vmImage: 'ubuntu-16.04'  
+        steps:
+          - task: Powershell@2
+            displayName: 'Set version environment variable'
+            inputs:
+              targetType: inline
+              script: |
+                Write-Host "##vso[task.setvariable variable=PackageVersion]${{parameters.PackageMajorVersion}}.${{parameters.PackageMinorVersion}}.${{parameters.PackagePatchVersion}}"           
+          - task: DotNetCoreCLI@2
+            displayName: Package nuget Package
+            inputs:
+              command: 'pack'
+              includesymbols: false
+              includesource: false
+              versioningScheme: byEnvVar
+              versionEnvVar: PackageVersion
+              projects: 'src/HttpTestUtils/*.csproj'
+              arguments: --configuration $(Build.Configuration)
+              buildProperties: 'VersionPrefix=$(PackageVersion)'
+              outputDir: $(Build.StagingDirectory)/nupkg
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Artifact'
+            inputs:
+              targetPath: '$(Build.StagingDirectory)'
+              artifact: 'artifact'
+          - task: NuGetCommand@2
+            displayName: 'Push to NuGet.org'
+            inputs:
+              command: push
+              packagesToPush: '$(Build.StagingDirectory)/nupkg/*.nupkg'
+              nuGetFeedType: external
+              publishFeedCredentials: 'nuget-push'
