@@ -2,7 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Frederik Gheysels</Authors>
+    <Copyright>Copyright © 2020 Frederik Gheysels</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/fgheysels/HttpTestUtils</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/fgheysels/HttpTestUtils</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <Description>Provides a HttpClient that can be used in unit-tests.  HttpClientMock allows to setup a HttpClient instance which returns a predefined response.</Description>
+    <PackageTags>HttpClient unittest test testable</PackageTags>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
