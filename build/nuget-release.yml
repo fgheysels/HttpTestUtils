@@ -69,4 +69,4 @@ stages:
               command: push
               packagesToPush: '$(Build.StagingDirectory)/nupkg/*.nupkg'
               nuGetFeedType: external
-              publishFeedCredentials: 'nuget-push'
+              publishFeedCredentials: 'nuget-push-wildcard'
