@@ -1,3 +1,8 @@
+# HttpTestUtils
+
+[![Build Status](https://frederikgheysels.visualstudio.com/GitHub%20Pipelines/_apis/build/status/HttpTestUtils/HttpTestUtils%20CI?branchName=master)](https://frederikgheysels.visualstudio.com/GitHub%20Pipelines/_build/latest?definitionId=4&branchName=master)
+[![NuGet Status](http://nugetstatus.com/HttpTestUtils.png)](http://nugetstatus.com/packages/HttpTestUtils)
+
 # Introduction
 
 `HttpTestUtils` contains some classes which make it easier to mock out dependencies on `HttpClient` during unit-tests.
