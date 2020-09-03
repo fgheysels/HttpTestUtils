@@ -29,5 +29,5 @@ stages:
             displayName: 'Run unittests'
             inputs:
               command: 'test'
-              projects: 'src/HttpTestUtils.Tests/*.csproj'
+              projects: 'src/HttpTestUtils/HttpTestUtils.Tests/*.csproj'
               testRunTitle: 'HttpTestUtils unittests'             
