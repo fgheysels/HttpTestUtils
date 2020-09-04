@@ -1,7 +1,7 @@
 # HttpTestUtils
 
 [![Build Status](https://frederikgheysels.visualstudio.com/GitHub%20Pipelines/_apis/build/status/HttpTestUtils/HttpTestUtils%20CI?branchName=master)](https://frederikgheysels.visualstudio.com/GitHub%20Pipelines/_build/latest?definitionId=4&branchName=master)
-[![NuGet Badge](https://buildstats.info/nuget/HttpTestUtils?includePreReleases=true)](https://www.nuget.org/packages/HttpTestUtils/)
+[![NuGet Badge](https://buildstats.info/nuget/httptestutils?includePreReleases=true)](https://www.nuget.org/packages/HttpTestUtils/)
 
 # Introduction
 
