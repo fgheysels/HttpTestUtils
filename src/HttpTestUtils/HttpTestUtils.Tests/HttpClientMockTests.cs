@@ -68,6 +68,68 @@ namespace HttpTestUtils.Tests
             await Assert.ThrowsAsync<InvalidOperationException>(async () => await sut.GetAsync(new Uri("http://localhost")));
         }
 
+        [Fact]
+        public async Task HttpClientMockCanUseCallbackResponseCreator()
+        {
+            var httpClient = HttpClientMock.SetupHttpClientWithJsonResponse<string>(onRequestCallback: async (request) =>
+            {
+                var requestContent = await request.Content.ReadAsStringAsync();
+
+                if (requestContent == "1")
+                {
+                    return new HttpResponseContent<string>(HttpStatusCode.OK, "fine");
+                }
+                else
+                {
+                    return new HttpResponseContent<string>(HttpStatusCode.NotFound, "not  found");
+                }
+            });
+
+            var firstRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost");
+            firstRequest.Content = new StringContent("2");
+
+            var firstResponse = await httpClient.SendAsync(firstRequest);
+
+            Assert.Equal(HttpStatusCode.NotFound, firstResponse.StatusCode);
+
+            var secondRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost");
+            secondRequest.Content = new StringContent("1");
+
+            var secondResponse = await httpClient.SendAsync(secondRequest);
+
+            Assert.Equal(HttpStatusCode.OK, secondResponse.StatusCode);
+        }
+
+        [Fact]
+        public async Task HttpClientMockWithCallBackResponseCreator_CanThrowException()
+        {
+            var httpClient = HttpClientMock.SetupHttpClientWithJsonResponse<string>(onRequestCallback: async (request) =>
+            {
+                var requestContent = await request.Content.ReadAsStringAsync();
+
+                if (requestContent == "1")
+                {
+                    return new HttpResponseContent<string>(HttpStatusCode.OK, "fine");
+                }
+                else
+                {
+                    throw new InvalidOperationException("An invalid operation exception happened!");
+                }
+            });
+
+            var firstRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost");
+            firstRequest.Content = new StringContent("1");
+
+            var firstResponse = await httpClient.SendAsync(firstRequest);
+
+            Assert.Equal(HttpStatusCode.OK, firstResponse.StatusCode);
+
+            var secondRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost");
+            secondRequest.Content = new StringContent("2");
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async ()=> await httpClient.SendAsync(secondRequest));
+        }
+
         private static async Task<T> GetContentFromResponseAsync<T>(HttpResponseMessage response)
         {
             return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());

@@ -24,6 +24,26 @@ namespace HttpTestUtils
             return new HttpClient(messageHandler);
         }
 
+        public static HttpClient SetupHttpClientWithJsonResponse<TResponseContent>(Func<HttpRequestMessage, Task<HttpResponseContent<TResponseContent>>> onRequestCallback)
+        {
+            var messageHandler =
+                new TestHttpMessageHandler(async request =>
+                {
+                    var responseContent = await onRequestCallback(request);
+
+                    var response = new HttpResponseMessage(responseContent.StatusCode)
+                    {
+                        Content = new StringContent(JsonConvert.SerializeObject(responseContent.Content),
+                                                    Encoding.UTF8,
+                                                    "application/json")
+                    };
+
+                    return response;
+                });
+
+            return new HttpClient(messageHandler);
+        } 
+
         /// <summary>
         /// Sets up a HttpClientMock that will return another response on each invocation.
         /// </summary>
