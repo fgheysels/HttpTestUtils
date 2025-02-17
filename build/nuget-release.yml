@@ -21,7 +21,7 @@ stages:
     jobs:
       - job: Compile_and_test
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-latest'
         steps:          
           - task: DotNetCoreCLI@2
             displayName: 'Build HttpTestUtils solution'
@@ -38,7 +38,7 @@ stages:
     jobs:
       - job: Package_and_push
         pool:
-          vmImage: 'ubuntu-16.04'  
+          vmImage: 'ubuntu-latest'  
         steps:
           - task: Powershell@2
             displayName: 'Set version environment variable'
