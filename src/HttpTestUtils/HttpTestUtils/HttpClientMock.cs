@@ -43,6 +43,13 @@ namespace HttpTestUtils
             return new HttpClient(messageHandler);
         }
 
+        /// <summary>
+        /// Sets up a HttpClient mock that will return the specified <paramref name="statusCode"/> and the response-content contains
+        /// the specified <paramref name="rawJson"/> string.
+        /// </summary>
+        /// <param name="statusCode"></param>
+        /// <param name="rawJson"></param>
+        /// <returns>A HttpClient that returns a HttpResponseMessage with the pre-defined status-code and content.</returns>
         public static HttpClient SetupHttpClientWithRawJsonResponse(HttpStatusCode statusCode, string rawJson)
         {
             var messageHandler =
@@ -52,7 +59,7 @@ namespace HttpTestUtils
         }
 
         /// <summary>
-        /// Sets up a HttpClientMock that will return another response on each invocation.
+        /// Sets up a HttpClient mock that will return another response on each invocation.
         /// </summary>
         /// <remarks>The HttpClient will return the responses in the same order as they appear in the <paramref name="responses"/> parameter.</remarks>
         /// <returns>A HttpClient instance that can be used for test purposes.</returns>
