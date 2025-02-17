@@ -83,7 +83,7 @@ namespace HttpTestUtils
             return new HttpClient(messageHandler);
         }
 
-        private class TestHttpMessageHandler : HttpMessageHandler
+        private sealed class TestHttpMessageHandler : HttpMessageHandler
         {
             private readonly Func<HttpRequestMessage, Task<HttpResponseMessage>> _createResponseFunction;
 
