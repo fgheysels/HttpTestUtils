@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -19,7 +18,7 @@ namespace HttpTestUtils
         public static HttpClient SetupHttpClientWithJsonResponse<TResponseContent>(HttpResponseContent<TResponseContent> response)
         {
             var messageHandler =
-                new TestHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(response.StatusCode) { Content = new StringContent(JsonConvert.SerializeObject(response.Content), Encoding.UTF8, "application/json") }));
+                new TestHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(response.StatusCode) { Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(response.Content), Encoding.UTF8, "application/json") }));
 
             return new HttpClient(messageHandler);
         }
@@ -33,7 +32,7 @@ namespace HttpTestUtils
 
                     var response = new HttpResponseMessage(responseContent.StatusCode)
                     {
-                        Content = new StringContent(JsonConvert.SerializeObject(responseContent.Content),
+                        Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(responseContent.Content),
                                                     Encoding.UTF8,
                                                     "application/json")
                     };
@@ -42,7 +41,15 @@ namespace HttpTestUtils
                 });
 
             return new HttpClient(messageHandler);
-        } 
+        }
+
+        public static HttpClient SetupHttpClientWithRawJsonResponse(HttpStatusCode statusCode, string rawJson)
+        {
+            var messageHandler =
+                new TestHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(statusCode) { Content = new StringContent(rawJson, Encoding.UTF8, "application/json") }));
+
+            return new HttpClient(messageHandler);
+        }
 
         /// <summary>
         /// Sets up a HttpClientMock that will return another response on each invocation.
@@ -65,7 +72,7 @@ namespace HttpTestUtils
 
                     var response = new HttpResponseMessage(responseContent.StatusCode)
                     {
-                        Content = new StringContent(JsonConvert.SerializeObject(responseContent.Content),
+                        Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(responseContent.Content),
                                                     Encoding.UTF8,
                                                     "application/json")
                     };
