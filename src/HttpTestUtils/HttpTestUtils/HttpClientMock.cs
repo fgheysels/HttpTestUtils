@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -19,7 +18,7 @@ namespace HttpTestUtils
         public static HttpClient SetupHttpClientWithJsonResponse<TResponseContent>(HttpResponseContent<TResponseContent> response)
         {
             var messageHandler =
-                new TestHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(response.StatusCode) { Content = new StringContent(JsonConvert.SerializeObject(response.Content), Encoding.UTF8, "application/json") }));
+                new TestHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(response.StatusCode) { Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(response.Content), Encoding.UTF8, "application/json") }));
 
             return new HttpClient(messageHandler);
         }
@@ -33,7 +32,7 @@ namespace HttpTestUtils
 
                     var response = new HttpResponseMessage(responseContent.StatusCode)
                     {
-                        Content = new StringContent(JsonConvert.SerializeObject(responseContent.Content),
+                        Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(responseContent.Content),
                                                     Encoding.UTF8,
                                                     "application/json")
                     };
@@ -42,10 +41,25 @@ namespace HttpTestUtils
                 });
 
             return new HttpClient(messageHandler);
-        } 
+        }
 
         /// <summary>
-        /// Sets up a HttpClientMock that will return another response on each invocation.
+        /// Sets up a HttpClient mock that will return the specified <paramref name="statusCode"/> and the response-content contains
+        /// the specified <paramref name="rawJson"/> string.
+        /// </summary>
+        /// <param name="statusCode"></param>
+        /// <param name="rawJson"></param>
+        /// <returns>A HttpClient that returns a HttpResponseMessage with the pre-defined status-code and content.</returns>
+        public static HttpClient SetupHttpClientWithRawJsonResponse(HttpStatusCode statusCode, string rawJson)
+        {
+            var messageHandler =
+                new TestHttpMessageHandler(_ => Task.FromResult(new HttpResponseMessage(statusCode) { Content = new StringContent(rawJson, Encoding.UTF8, "application/json") }));
+
+            return new HttpClient(messageHandler);
+        }
+
+        /// <summary>
+        /// Sets up a HttpClient mock that will return another response on each invocation.
         /// </summary>
         /// <remarks>The HttpClient will return the responses in the same order as they appear in the <paramref name="responses"/> parameter.</remarks>
         /// <returns>A HttpClient instance that can be used for test purposes.</returns>
@@ -65,7 +79,7 @@ namespace HttpTestUtils
 
                     var response = new HttpResponseMessage(responseContent.StatusCode)
                     {
-                        Content = new StringContent(JsonConvert.SerializeObject(responseContent.Content),
+                        Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(responseContent.Content),
                                                     Encoding.UTF8,
                                                     "application/json")
                     };
@@ -76,7 +90,7 @@ namespace HttpTestUtils
             return new HttpClient(messageHandler);
         }
 
-        private class TestHttpMessageHandler : HttpMessageHandler
+        private sealed class TestHttpMessageHandler : HttpMessageHandler
         {
             private readonly Func<HttpRequestMessage, Task<HttpResponseMessage>> _createResponseFunction;
 

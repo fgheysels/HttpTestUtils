@@ -24,6 +24,19 @@ namespace HttpTestUtils.Tests
         }
 
         [Fact]
+        public async Task HttpClientMockReturnsExpectedRawJsonResult()
+        {
+            var sut = HttpClientMock.SetupHttpClientWithRawJsonResponse(
+                HttpStatusCode.Accepted,
+                """{"foo":1,"bar":2}""");
+
+            var response = await sut.GetAsync(new Uri("http://abc.com"));
+
+            Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+            Assert.Equal("""{"foo":1,"bar":2}""", await response.Content.ReadAsStringAsync());
+        }
+
+        [Fact]
         public async Task HttpClientMockReturnsMultipleResults()
         {
             var responses = new[]
@@ -127,7 +140,7 @@ namespace HttpTestUtils.Tests
             var secondRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost");
             secondRequest.Content = new StringContent("2");
 
-            await Assert.ThrowsAsync<InvalidOperationException>(async ()=> await httpClient.SendAsync(secondRequest));
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await httpClient.SendAsync(secondRequest));
         }
 
         private static async Task<T> GetContentFromResponseAsync<T>(HttpResponseMessage response)

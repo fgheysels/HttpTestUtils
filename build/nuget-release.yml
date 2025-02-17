@@ -10,7 +10,8 @@ parameters:
   type: number
 - name: PackagePatchVersion
   type: number
-
+- name: PackagePreview
+  type: boolean
 
 variables:
 - name: Build.Configuration
@@ -21,7 +22,7 @@ stages:
     jobs:
       - job: Compile_and_test
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-latest'
         steps:          
           - task: DotNetCoreCLI@2
             displayName: 'Build HttpTestUtils solution'
@@ -38,14 +39,21 @@ stages:
     jobs:
       - job: Package_and_push
         pool:
-          vmImage: 'ubuntu-16.04'  
+          vmImage: 'ubuntu-latest'  
         steps:
           - task: Powershell@2
             displayName: 'Set version environment variable'
             inputs:
               targetType: inline
-              script: |
-                Write-Host "##vso[task.setvariable variable=PackageVersion]${{parameters.PackageMajorVersion}}.${{parameters.PackageMinorVersion}}.${{parameters.PackagePatchVersion}}"           
+              script: |     
+                $versionSuffix = ""
+                # Double $ before the parameter expression to make sure that the return type is
+                # treated as a boolean.
+                if( $true -eq $${{parameters.PackagePreview}}) {
+                    $versionSuffix = "-beta-$(Build.BuildNumber)"
+                }
+                Write-Host "##vso[task.setvariable variable=PackageVersion]${{parameters.PackageMajorVersion}}.${{parameters.PackageMinorVersion}}.${{parameters.PackagePatchVersion}}$versionSuffix"
+
           - task: DotNetCoreCLI@2
             displayName: Package nuget Package
             inputs:
@@ -69,4 +77,4 @@ stages:
               command: push
               packagesToPush: '$(Build.StagingDirectory)/nupkg/*.nupkg'
               nuGetFeedType: external
-              publishFeedCredentials: 'nuget-push-wildcard'
+              publishFeedCredentials: 'nuget-push'
